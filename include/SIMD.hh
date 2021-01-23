@@ -141,5 +141,5 @@ namespace SIMD
 #    endif
 #endif
     }
-} // namespace SIMD
+}; // namespace SIMD
 #endif
