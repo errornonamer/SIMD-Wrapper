@@ -140,6 +140,6 @@ namespace SIMD
         std::array<float, 8> mValues{};
 #    endif
 #endif
-    }
-}; // namespace SIMD
+    };
+} // namespace SIMD
 #endif
