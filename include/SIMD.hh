@@ -1,6 +1,11 @@
 #ifndef SIMD_HH
 #define SIMD_HH
 #define SIMD_USE_EXCEPTION 1
+
+#if SIMD_USE_EXCEPTION != 0
+#    include <exception>
+#endif
+
 #ifdef _MSC_VER
 // msvc
 // hack: vscode defines _MSC_VER but use gcc/clang style of defining simd support (MMX, SSE, SSE2 macro)
