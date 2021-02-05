@@ -1,3 +1,4 @@
+# hack: llvm-header-guard check doesn't seem to be working on windows build of clang-tidy I'm using, turn it off
 Checks: '*,
          -clang-diagnostic-unused-command-line-argument,
          -cppcoreguidelines-avoid-magic-numbers,
@@ -11,6 +12,7 @@ Checks: '*,
          -fuchsia-overloaded-operator,
          -fuchsia-trailing-return,
          -hicpp-uppercase-literal-suffix,
+         -llvm-header-guard,
          -misc-non-private-member-variables-in-classes,
          -modernize-use-trailing-return-type,
          -portability-simd-intrinsics,
