@@ -2,22 +2,69 @@
 #define SIMDFLOAT_HH
 #include "SIMD.hh"
 
+#   include <cstdint>
+
 namespace SIMD
 {
-    class Float4
+    class BaseFloat128
     {
     public:
-        explicit Float4(std::array<float, 4> pArray)
+        BaseFloat128() = default;
+
+        explicit BaseFloat128(int8_t *pBytes)
         {
 #if SIMD_LEVEL > 1
-            mValues = _mm_load_ps(pArray.data());
+            mValues = _mm_load_ps(reinterpret_cast<float *>(pBytes));
 #else
-            mValues = pArray;
+            std::memcpy(mValues.data(), pBytes, sizeof(int8_t) * 16);
 #endif
         }
 
+    protected:
 #if SIMD_LEVEL > 1
-        explicit Float4(__m128 pValue)
+        __m128 mValues;
+#else
+        std::array<float, 4> mValues{};
+#endif
+    };
+
+    class BaseFloat256
+    {
+    public:
+        BaseFloat256() = default;
+
+        explicit BaseFloat256(int8_t *pBytes)
+        {
+if SIMD_LEVEL > 3
+            mValues = _mm128_load_ps(reinterpret_cast<float *>(pBytes));
+#else
+#    if SIMD_LEVEL > 1
+            mValues1 = _mm_load_ps(reinterpret_cast<float *>(pBytes));
+            mValues2 = _mm_load_ps(reinterpret_cast<float *>(pBytes) + 4);
+#    else
+            std::memcpy(mValues.data(), pBytes, sizeof(int8_t) * 32);
+#    endif
+#endif
+        }
+    protected:
+#if SIMD_LEVEL > 3
+        __m256 mValues;
+#else
+#    if SIMD_LEVEL > 1
+        __m128 mValues1;
+        __m128 mValues2;
+#    else
+        std::array<float, 8> mValues{};
+#    endif
+    };
+
+    class Float4 : public BaseFloat128
+    {
+    public:
+        explicit Float4(std::array<float, 4> pArray) : BaseFloat128(reinterpret_cast<int8_t *>(pArray.data())){}
+
+#if SIMD_LEVEL > 1
+        explicit Float4(__m128 pValue) : BaseFloat128()
         {
             mValues = pValue;
         }
@@ -222,30 +269,13 @@ namespace SIMD
         {
             return *this / Float4({pScala, pScala, pScala, pScala});
         }
-
-    private:
-#if SIMD_LEVEL > 1
-        __m128 mValues;
-#else
-        std::array<float, 4> mValues{};
-#endif
     };
 
-    class Float8
+    class Float8 : public BaseFloat256
     {
     public:
-        explicit Float8(std::array<float, 8> pArray)
+        explicit Float8(std::array<float, 8> pArray) : BaseFloat256(reinterpret_cast<int8_t *>(pArray.data()))
         {
-#if SIMD_LEVEL > 3
-            mValues = _mm256_load_ps(pArray.data());
-#else
-#    if SIMD_LEVEL > 1
-            mValues1 = _mm_load_ps(pArray.data());
-            mValues2 = _mm_load_ps(pArray.data() + 4);
-#    else
-            mValues = pArray;
-#    endif
-#endif
         }
 
         float operator[](int pIndex) const
@@ -287,18 +317,6 @@ namespace SIMD
             return mValues[pIndex]; //NOLINT
 #endif
         }
-
-    private:
-#if SIMD_LEVEL > 3
-        __m256 mValues;
-#else
-#    if SIMD_LEVEL > 1
-        __m128 mValues1;
-        __m128 mValues2;
-#    else
-        std::array<float, 8> mValues{};
-#    endif
-#endif
     };
 } // namespace SIMD
 #endif
